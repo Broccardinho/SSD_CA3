@@ -18,3 +18,19 @@ export default {
     },
     plugins: [],
 };
+
+module.exports = {
+    content: [
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+    ],
+    theme: {
+        extend: {
+            fontFamily: {
+                'press-start': ['"Press Start 2P"', 'cursive'],
+            },
+        },
+    },
+    plugins: [],
+}
