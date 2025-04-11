@@ -27,3 +27,20 @@ return new class extends Migration
         Schema::dropIfExists('pokemon');
     }
 };
+// Create teams migration
+Schema::create('teams', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->foreignId('user_id')->constrained();
+    $table->timestamps();
+});
+
+// Create team_pokemon pivot table
+Schema::create('team_pokemon', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('team_id')->constrained();
+    $table->foreignId('pokemon_id')->constrained();
+    $table->json('moves')->nullable();
+    $table->string('item')->nullable();
+    $table->timestamps();
+});

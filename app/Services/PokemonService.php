@@ -42,6 +42,10 @@ class PokemonService
 
     protected function storePokemon(array $pokemonData)
     {
+
+        $spriteUrl = $pokemonData['sprites']['other']['official-artwork']['front_default']
+            ?? $pokemonData['sprites']['front_default'];
+
         Pokemon::updateOrCreate(
             ['pokeapi_id' => $pokemonData['id']],
             [
@@ -49,7 +53,7 @@ class PokemonService
                 'height' => $pokemonData['height'],
                 'weight' => $pokemonData['weight'],
                 'base_experience' => $pokemonData['base_experience'],
-                'sprite_url' => $pokemonData['sprites']['front_default'],
+                'sprite_url' => $spriteUrl,
                 'types' => $this->extractTypes($pokemonData['types']),
                 'abilities' => $this->extractAbilities($pokemonData['abilities']),
                 'stats' => $this->extractStats($pokemonData['stats']),
