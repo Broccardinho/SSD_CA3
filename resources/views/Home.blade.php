@@ -20,13 +20,22 @@
             </div>
             <nav class="flex space-x-2 md:space-x-6">
                 <a href="#" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
-                {{--                <a href="{{ route('builder') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">BUILDER</a>--}}
-                {{--                <a href="{{ route('pokedex') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">POKÉDEX</a>--}}
-                {{--                @auth--}}
-                {{--                    <a href="{{ route('dashboard') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">DASHBOARD</a>--}}
-                {{--                @else--}}
-                {{--                    <a href="{{ route('login') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGIN</a>--}}
-                {{--                @endauth--}}
+                <nav class="flex space-x-2 md:space-x-6">
+                    <a href="{{ route('home') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
+                    @auth
+                        <a href="{{ route('builder') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">BUILDER</a>
+                    @endauth
+                    <a href="{{ route('pokedex') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">POKÉDEX</a>
+                    @auth
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGOUT</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGIN</a>
+                        <a href="{{ route('register') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">REGISTER</a>
+                    @endauth
+                </nav>
             </nav>
         </div>
     </div>
