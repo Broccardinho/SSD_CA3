@@ -1,10 +1,10 @@
 <?php
-// app/Models/Team.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Team extends Model
+class Teams extends Model
 {
     protected $fillable = ['name', 'user_id'];
 
@@ -15,20 +15,8 @@ class Team extends Model
 
     public function pokemon()
     {
-        return $this->belongsToMany(Pokemon::class)
-            ->using(TeamPokemon::class)
-            ->withPivot(['moves', 'item']);
+        return $this->belongsToMany(Pokemon::class, 'team_pokemon')
+            ->withPivot(['moves', 'item'])
+            ->withTimestamps();
     }
-}
-
-// app/Models/TeamPokemon.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-class TeamPokemon extends Pivot
-{
-    protected $casts = [
-        'moves' => 'array'
-    ];
 }

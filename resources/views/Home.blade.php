@@ -76,7 +76,7 @@
                 <h3 class="text-red-600 text-sm md:text-base mb-2">TEAM BUILDER</h3>
                 <p class="text-gray-700 text-xs">Create teams with real PokéAPI data including stats, moves, and abilities.</p>
             </div>
-            <img src="{{ $charizard->sprite_url }}"
+            <img src="#"
                  alt="Charizard"
                  class="w-full rounded border-2 border-gray-400">
         </div>
@@ -84,14 +84,14 @@
         <!-- Repeat for other cards -->
         <div class="bg-gray-200 p-4 rounded-lg border-4 border-gray-400">
             <!-- ... -->
-            <img src="{{ $blastoise->sprite_url }}"
+            <img src="#"
                  alt="Blastoise"
                  class="w-full rounded border-2 border-gray-400">
         </div>
 
         <div class="bg-gray-200 p-4 rounded-lg border-4 border-gray-400">
             <!-- ... -->
-            <img src="{{ $venusaur->sprite_url }}"
+            <img src="#"
                  alt="Venusaur"
                  class="w-full rounded border-2 border-gray-400">
         </div>
