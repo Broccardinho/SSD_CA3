@@ -18,8 +18,6 @@
                 <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball" class="h-12 w-12 mr-4">
                 <h1 class="text-yellow-400 text-2xl md:text-3xl text-shadow">POKÉMON TEAM BUILDER</h1>
             </div>
-            <nav class="flex space-x-2 md:space-x-6">
-                <a href="#" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
                 <nav class="flex space-x-2 md:space-x-6">
                     <a href="{{ route('home') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
                     @auth
@@ -36,7 +34,6 @@
                         <a href="{{ route('register') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">REGISTER</a>
                     @endauth
                 </nav>
-            </nav>
         </div>
     </div>
 </header>
