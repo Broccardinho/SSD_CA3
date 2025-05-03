@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('teams', TeamController::class);
     Route::post('/teams/{team}/add-pokemon', [TeamController::class, 'addPokemon'])->name('teams.add-pokemon');
     Route::delete('/teams/{team}/remove-pokemon/{pokemon}', [TeamController::class, 'removePokemon'])->name('teams.remove-pokemon');
+    Route::put('/teams/{team}', [TeamController::class, 'updateTeam'])->name('teams.update');
 });
 
 Auth::routes();
@@ -30,3 +31,4 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+

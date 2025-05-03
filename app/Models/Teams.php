@@ -1,34 +1,28 @@
 <?php
-// app/Models/Team.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Team extends Model
 {
-    protected $fillable = ['name', 'user_id'];
+    protected $fillable = ['name', 'user_id', 'is_active'];
 
-    public function user()
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function pokemon()
+    public function pokemon(): BelongsToMany
     {
         return $this->belongsToMany(Pokemon::class)
-            ->using(TeamPokemon::class)
-            ->withPivot(['moves', 'item']);
+            ->withPivot(['moves', 'item', 'position'])
+            ->orderBy('pivot_position');
     }
-}
-
-// app/Models/TeamPokemon.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-class TeamPokemon extends Pivot
-{
-    protected $casts = [
-        'moves' => 'array'
-    ];
 }
