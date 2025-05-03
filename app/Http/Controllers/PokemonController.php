@@ -15,11 +15,24 @@ class PokemonController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('q');
-        $pokemon = Pokemon::where('name', 'like', "%{$query}%")
-            ->limit(12)
-            ->get();
+        $query = $request->input('q', '');
 
-        return response()->json($pokemon);
+        // Basic validation
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        try {
+            $results = Pokemon::where('name', 'like', "%$query%")
+                ->orWhere('pokeapi_id', $query)
+                ->select(['id', 'name', 'sprite_url', 'pokeapi_id'])
+                ->limit(12)
+                ->get();
+
+            return response()->json($results);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
