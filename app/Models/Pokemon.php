@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Pokemon extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'pokeapi_id',
         'name',
@@ -16,14 +14,25 @@ class Pokemon extends Model
         'weight',
         'base_experience',
         'sprite_url',
-        'types',
-        'abilities',
-        'stats',
+        // other fields...
     ];
 
-    protected $casts = [
-        'types' => 'array',
-        'abilities' => 'array',
-        'stats' => 'array',
-    ];
+    /**
+     * The types that belong to the Pokémon
+     */
+    public function types(): BelongsToMany
+    {
+        return $this->belongsToMany(Type::class, 'pokemon_type', 'pokemon_id', 'type_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * The stats that belong to the Pokémon
+     */
+    public function stats(): BelongsToMany
+    {
+        return $this->belongsToMany(Stat::class, 'pokemon_stat', 'pokemon_id', 'stat_id')
+            ->withPivot('value')
+            ->withTimestamps();
+    }
 }
