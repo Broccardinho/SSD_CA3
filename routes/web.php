@@ -38,3 +38,13 @@ Route::get('/pokedex', function () {
 Route::get('/pokedex/{id}', function ($id) {
     return view('pokemon-details', ['pokemonId' => $id]); // We'll create this view
 })->name('pokemon.details');
+
+// Team routes
+Route::prefix('teams/{team}')->group(function() {
+    Route::post('/add-pokemon', [TeamController::class, 'addPokemonWithPosition']);
+    Route::delete('/remove-pokemon/{pokemon}', [TeamController::class, 'removePokemon']);
+    Route::delete('/clear', [TeamController::class, 'clearTeam']);
+    Route::put('/reorder', [TeamController::class, 'reorderTeam']);
+});
+
+Route::get('/pokemon/search', [PokemonController::class, 'search'])->name('pokemon.search');

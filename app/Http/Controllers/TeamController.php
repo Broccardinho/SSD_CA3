@@ -19,7 +19,14 @@ class TeamController extends Controller
      */
     public function builder()
     {
-        $team = auth()->user()->teams()->firstOrCreate(['name' => 'My First Team']);
+        // Get the first team or create a new one if none exists
+        $team = auth()->user()->teams()->firstOrCreate([
+            'name' => 'My First Team'
+        ], [
+            'description' => 'My starter Pokémon team',
+            'is_public' => false
+        ]);
+
         return view('builder', [
             'team' => $team->load('pokemon')
         ]);
@@ -168,5 +175,85 @@ class TeamController extends Controller
         ]);
 
         return back()->with('success', 'Pokémon updated successfully!');
+    }
+
+    // Add to TeamController
+    /**
+     * Add a Pokémon to the team with position
+     */
+    public function addPokemonWithPosition(Team $team, Request $request)
+    {
+        $this->authorize('update', $team);
+
+        $request->validate([
+            'pokemon_id' => 'required|exists:pokemon,id',
+            'position' => 'required|integer|between:1,6'
+        ]);
+
+        // Check if position is already taken
+        if ($team->pokemon()->wherePivot('position', $request->position)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This team slot is already occupied!'
+            ], 400);
+        }
+
+        // Check if Pokémon is already on team
+        if ($team->pokemon()->where('pokemon_id', $request->pokemon_id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This Pokémon is already on your team!'
+            ], 400);
+        }
+
+        $team->pokemon()->attach($request->pokemon_id, [
+            'position' => $request->position,
+            'moves' => [],
+            'item' => null
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Clear the entire team
+     */
+    public function clearTeam(Team $team)
+    {
+        $this->authorize('update', $team);
+
+        $team->pokemon()->detach();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Reorder Pokémon in the team
+     */
+    public function reorderTeam(Team $team, Request $request)
+    {
+        $this->authorize('update', $team);
+
+        $request->validate([
+            'order' => 'required|array|size:6',
+            'order.*.pokemon_id' => 'nullable|exists:pokemon,id',
+            'order.*.position' => 'required|integer|between:1,6'
+        ]);
+
+        // Clear all current positions
+        $team->pokemon()->detach();
+
+        // Add Pokémon with new positions
+        foreach ($request->order as $slot) {
+            if ($slot['pokemon_id']) {
+                $team->pokemon()->attach($slot['pokemon_id'], [
+                    'position' => $slot['position'],
+                    'moves' => [],
+                    'item' => null
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
     }
 }
