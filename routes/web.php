@@ -30,3 +30,11 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/pokedex', function () {
+    return view('pokedex');
+})->name('pokedex');
+
+Route::get('/pokedex/{id}', function ($id) {
+    return view('pokemon-details', ['pokemonId' => $id]); // We'll create this view
+})->name('pokemon.details');
