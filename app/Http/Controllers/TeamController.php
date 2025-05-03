@@ -19,9 +19,16 @@ class TeamController extends Controller
      */
     public function builder()
     {
-        $team = auth()->user()->teams()->firstOrCreate(['name' => 'My First Team']);
+        $team = auth()->user()->teams()
+            ->firstOrCreate(
+                ['name' => 'My First Gen 1 Team'],
+                ['format' => 'gen1']
+            );
+
         return view('builder', [
-            'team' => $team->load('pokemon')
+            'team' => $team->load(['pokemon' => function($query) {
+                $query->where('generation', 1);
+            }])
         ]);
     }
 
@@ -115,7 +122,7 @@ class TeamController extends Controller
         $this->authorize('update', $team);
 
         $request->validate([
-            'pokemon_id' => 'required|exists:pokemon,id',
+            'pokemon_id' => 'required|exists:pokemon,id,generation,1',
             'moves' => 'array|max:4',
             'item' => 'string|nullable'
         ]);
