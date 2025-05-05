@@ -1,6 +1,59 @@
 @extends('layouts.app')
 
 @section('content')
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pokémon Team Builder | Gen 1</title>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <style>
+        .pokedex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .pokemon-card {
+            background: #ffffff;
+            border: 4px solid #3B4CCA;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-2px);
+            border-color: #FF0000;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .pixel-sprite {
+            image-rendering: pixelated;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        .loading-pokeball {
+            animation: spin 1s linear infinite;
+            width: 60px;
+            height: 60px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
     <div class="bg-blue-100 min-h-screen" style="font-family: 'Press Start 2P', cursive;">
         <!-- Header Matching Home Menu -->
         <header class="bg-red-600 border-b-8 border-yellow-400 shadow-lg">
@@ -51,7 +104,7 @@
             </div>
 
             <!-- Search Section -->
-            <div class="bg-white rounded-lg border-4 border-blue-800 p-6 mb-8">
+            <div class="bg-white rounded-lg border-4 border-blue-800 p-4 mb-8">
                 <div class="mb-6">
                     <input type="text"
                            id="pokemonSearch"
@@ -60,8 +113,9 @@
                            style="font-family: 'Press Start 2P', cursive;">
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4" id="searchResults">
-                    <!-- Search results will appear here -->
+                <!-- Search Results Grid -->
+                <div class="pokedex-grid" id="searchResults">
+                    <!-- Results will appear here -->
                 </div>
             </div>
 
@@ -87,7 +141,6 @@
             const saveButton = document.getElementById('saveTeam');
             const clearButton = document.getElementById('clearTeam');
 
-            // Search functionality
             searchInput.addEventListener('input', debounce(function(e) {
                 const query = e.target.value.trim();
 
@@ -97,31 +150,39 @@
                 }
 
                 fetch(`/pokemon/search?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network error');
+                        return response.json();
+                    })
                     .then(pokemonList => {
                         searchResults.innerHTML = pokemonList.map(pokemon => `
-                        <div class="pokemon-card cursor-pointer" data-pokemon-id="${pokemon.id}">
-                            <img src="${pokemon.sprite_url}"
-                                 class="pixel-sprite"
-                                 alt="${pokemon.name}">
-                            <p class="text-gray-800 text-xs mt-2">${pokemon.name.toUpperCase()}</p>
-                            <p class="text-gray-500 text-xxs">#${pokemon.pokeapi_id.toString().padStart(3, '0')}</p>
-                        </div>
-                    `).join('');
+                <div class="pokemon-card" data-pokemon-id="${pokemon.id}">
+                    <img src="${pokemon.sprite_url}"
+                         class="pixel-sprite"
+                         alt="${pokemon.name}">
+                    <p class="text-xs mt-1">${pokemon.name.toUpperCase()}</p>
+                    <p class="text-xxs">#${pokemon.pokeapi_id.toString().padStart(3, '0')}</p>
+                </div>
+            `).join('');
 
-                        // Add click event to search results
+                        // Add click handlers
                         document.querySelectorAll('.pokemon-card').forEach(card => {
                             card.addEventListener('click', function() {
                                 const pokemonId = this.getAttribute('data-pokemon-id');
                                 addPokemonToTeam(pokemonId);
                             });
                         });
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        searchResults.innerHTML = '<p class="text-red-500">Search failed</p>';
                     });
             }, 300));
 
-            // Add Pokémon to team
             function addPokemonToTeam(pokemonId) {
-                const emptySlot = document.querySelector('.pokemon-card:not(:has(img[src$=".png"]))');
+                // Find first empty slot (div without an img child)
+                const emptySlot = [...document.querySelectorAll('#team-slots > div')]
+                    .find(slot => !slot.querySelector('img[src*=".png"]'));
 
                 if (!emptySlot) {
                     alert('Your team is already full! Remove a Pokémon first.');
@@ -134,20 +195,30 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         pokemon_id: pokemonId,
                         position: slotNumber
                     })
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw err; });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             window.location.reload();
                         } else {
                             alert(data.message || 'Error adding Pokémon to team');
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert(error.message || 'Failed to add Pokémon');
                     });
             }
 
@@ -221,7 +292,128 @@
             }
         });
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('pokemonSearch');
+            const searchResults = document.getElementById('searchResults');
+            let allPokemon = []; // Will store our Pokémon data
 
+            // Load all Pokémon initially (like Pokédex does)
+            async function loadAllPokemon() {
+                try {
+                    searchResults.innerHTML = `
+                <div class="col-span-full text-center py-10">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                         alt="Loading"
+                         class="loading-pokeball mx-auto">
+                    <p class="text-gray-600 mt-4 text-sm">LOADING POKÉMON...</p>
+                </div>`;
+
+                    // Fetch first 151 Pokémon from PokeAPI
+                    const pokemonList = [];
+                    for (let id = 1; id <= 151; id++) {
+                        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                        pokemonList.push({
+                            id: response.data.id,
+                            name: response.data.name,
+                            sprite_url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${response.data.id}.png`,
+                            pokeapi_id: response.data.id
+                        });
+                    }
+
+                    allPokemon = pokemonList;
+                    displaySearchResults(allPokemon);
+
+                } catch (error) {
+                    console.error("Error loading Pokémon:", error);
+                    searchResults.innerHTML = `
+                <div class="col-span-full text-center py-10">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/54.png"
+                         alt="Error"
+                         class="w-16 h-16 mx-auto">
+                    <p class="text-red-600 mt-4 text-sm">ERROR LOADING POKÉMON!</p>
+                </div>`;
+                }
+            }
+
+            // Display results in the grid
+            function displaySearchResults(pokemonList) {
+                searchResults.innerHTML = '';
+
+                pokemonList.sort((a, b) => a.id - b.id).forEach(pokemon => {
+                    const card = document.createElement('div');
+                    card.className = 'pokemon-card';
+                    card.innerHTML = `
+                <img src="${pokemon.sprite_url}"
+                     alt="${pokemon.name}"
+                     class="pixel-sprite">
+                <p class="text-gray-800 text-xs mt-2">${pokemon.name.toUpperCase()}</p>
+                <p class="text-gray-500 text-xxs">#${pokemon.id.toString().padStart(3, '0')}</p>
+            `;
+                    card.addEventListener('click', () => {
+                        addPokemonToTeam(pokemon.id);
+                    });
+                    searchResults.appendChild(card);
+                });
+            }
+
+            // Search functionality (client-side filtering)
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+
+                if (!searchTerm) {
+                    displaySearchResults(allPokemon);
+                    return;
+                }
+
+                const filtered = allPokemon.filter(pokemon =>
+                    pokemon.name.toLowerCase().includes(searchTerm) ||
+                    pokemon.id.toString().includes(searchTerm)
+                );
+
+                displaySearchResults(filtered);
+            });
+
+            // Keep your existing addPokemonToTeam function
+            function addPokemonToTeam(pokemonId) {
+                const emptySlot = document.querySelector('.team-slot:not(:has(img))');
+
+                if (!emptySlot) {
+                    alert('Your team is already full! Remove a Pokémon first.');
+                    return;
+                }
+
+                const slotNumber = emptySlot.getAttribute('data-slot');
+                const pokemon = allPokemon.find(p => p.id == pokemonId);
+
+                fetch(`/teams/{{ $team->id }}/add-pokemon`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        pokemon_id: pokemonId,
+                        position: slotNumber,
+                        name: pokemon.name,
+                        sprite_url: pokemon.sprite_url
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Error adding Pokémon to team');
+                        }
+                    });
+            }
+
+            // Initialize
+            loadAllPokemon();
+
+            // Keep your existing remove/clear/save functions
+            // ...
+        });
     </script>
 
     <style>

@@ -119,30 +119,46 @@ class TeamController extends Controller
      */
     public function addPokemon(Team $team, Request $request)
     {
-        $this->authorize('update', $team);
-
         $request->validate([
-            'pokemon_id' => 'required|exists:pokemon,id',
-            'moves' => 'array|max:4',
-            'item' => 'string|nullable'
+            'pokemon_id' => 'required|integer',
+            'position' => 'required|integer|between:1,6',
+            'name' => 'sometimes|string',
+            'sprite_url' => 'sometimes|url'
         ]);
 
-        // Check team size limit (max 6 Pokémon)
+        // Check if team is full
         if ($team->pokemon()->count() >= 6) {
-            return back()->with('error', 'Your team already has 6 Pokémon!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Your team is already full!'
+            ], 400);
         }
 
-        // Check for duplicate Pokémon
-        if ($team->pokemon()->where('pokemon_id', $request->pokemon_id)->exists()) {
-            return back()->with('error', 'This Pokémon is already on your team!');
+        // Check if slot is occupied
+        if ($team->pokemon()->wherePivot('position', $request->position)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This team slot is already occupied!'
+            ], 400);
         }
 
-        $team->pokemon()->attach($request->pokemon_id, [
-            'moves' => $request->moves,
-            'item' => $request->item
+        // Find or create the Pokémon in your database
+        $pokemon = Pokemon::firstOrCreate(
+            ['pokeapi_id' => $request->pokemon_id],
+            [
+                'name' => $request->name,
+                'sprite_url' => $request->sprite_url
+            ]
+        );
+
+        // Attach to team
+        $team->pokemon()->attach($pokemon->id, [
+            'position' => $request->position,
+            'moves' => [],
+            'item' => null
         ]);
 
-        return back()->with('success', 'Pokémon added to team!');
+        return response()->json(['success' => true]);
     }
 
     /**
