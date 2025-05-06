@@ -19,7 +19,7 @@ Route::get('/pokedex/{id}', [PokemonController::class, 'show'])->name('pokedex.s
 Route::middleware(['auth'])->group(function () {
     Route::get('/builder', [TeamController::class, 'builder'])->name('builder');
     Route::resource('teams', TeamController::class);
-    Route::post('/teams/{team}/add-pokemon', [TeamController::class, 'addPokemon'])->name('teams.add-pokemon');
+    Route::post('/teams/{team}/add-pokemon', [TeamController::class, 'addPokemon'])->middleware('auth')->name('teams.add-pokemon');
     Route::delete('/teams/{team}/remove-pokemon/{pokemon}', [TeamController::class, 'removePokemon'])->name('teams.remove-pokemon');
 });
 
@@ -40,11 +40,13 @@ Route::get('/pokedex/{id}', function ($id) {
 })->name('pokemon.details');
 
 // Team routes
-Route::prefix('teams/{team}')->group(function() {
-    Route::post('/add-pokemon', [TeamController::class, 'addPokemonWithPosition']);
-    Route::delete('/remove-pokemon/{pokemon}', [TeamController::class, 'removePokemon']);
-    Route::delete('/clear', [TeamController::class, 'clearTeam']);
-    Route::put('/reorder', [TeamController::class, 'reorderTeam']);
+Route::prefix('teams/{team}')->middleware('auth')->group(function() {
+    Route::post('/add-pokemon', [App\Http\Controllers\TeamController::class, 'addPokemon'])->name('teams.add-pokemon');
+    Route::delete('/remove-pokemon/{pokemon}', [App\Http\Controllers\TeamController::class, 'removePokemon'])->name('teams.remove-pokemon');
+    Route::delete('/clear', [App\Http\Controllers\TeamController::class, 'clearTeam'])->name('teams.clear');
+    Route::put('/reorder', [App\Http\Controllers\TeamController::class, 'reorderTeam'])->name('teams.reorder');
 });
 
-Route::get('/pokemon/search', [PokemonController::class, 'search'])->name('pokemon.search');
+Route::get('/pokemon/search', [App\Http\Controllers\PokemonController::class, 'search'])->name('pokemon.search');
+
+Route::put('/teams/{team}', [App\Http\Controllers\TeamController::class, 'save'])->middleware('auth')->name('teams.save');

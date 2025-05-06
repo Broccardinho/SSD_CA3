@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\Pokemon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TeamController extends Controller
 {
@@ -19,7 +20,6 @@ class TeamController extends Controller
      */
     public function builder()
     {
-        // Get the first team or create a new one if none exists
         $team = auth()->user()->teams()->firstOrCreate([
             'name' => 'My First Team'
         ], [
@@ -27,8 +27,15 @@ class TeamController extends Controller
             'is_public' => false
         ]);
 
+        $team->load('pokemon');
+        \Illuminate\Support\Facades\Log::debug('Team Pokémon after load:', [
+            'team_id' => $team->id,
+            'pokemon_count' => $team->pokemon->count(),
+            'pokemon' => $team->pokemon->toArray()
+        ]);
+
         return view('builder', [
-            'team' => $team->load('pokemon')
+            'team' => $team
         ]);
     }
 
@@ -119,14 +126,15 @@ class TeamController extends Controller
      */
     public function addPokemon(Team $team, Request $request)
     {
+        Log::debug('Authenticated user:', ['user_id' => auth()->id()]);
+        Log::debug('Team being accessed:', ['team_id' => $team->id, 'user_id' => $team->user_id]);
+         $this->authorize('update', $team);
+
         $request->validate([
-            'pokemon_id' => 'required|integer',
+            'pokemon_id' => 'required|exists:pokemon,id',
             'position' => 'required|integer|between:1,6',
-            'name' => 'sometimes|string',
-            'sprite_url' => 'sometimes|url'
         ]);
 
-        // Check if team is full
         if ($team->pokemon()->count() >= 6) {
             return response()->json([
                 'success' => false,
@@ -134,7 +142,6 @@ class TeamController extends Controller
             ], 400);
         }
 
-        // Check if slot is occupied
         if ($team->pokemon()->wherePivot('position', $request->position)->exists()) {
             return response()->json([
                 'success' => false,
@@ -142,20 +149,23 @@ class TeamController extends Controller
             ], 400);
         }
 
-        // Find or create the Pokémon in your database
-        $pokemon = Pokemon::firstOrCreate(
-            ['pokeapi_id' => $request->pokemon_id],
-            [
-                'name' => $request->name,
-                'sprite_url' => $request->sprite_url
-            ]
-        );
+        if ($team->pokemon()->where('pokemon_id', $request->pokemon_id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This Pokémon is already on your team!'
+            ], 400);
+        }
 
-        // Attach to team
-        $team->pokemon()->attach($pokemon->id, [
+        $team->pokemon()->attach($request->pokemon_id, [
             'position' => $request->position,
             'moves' => [],
             'item' => null
+        ]);
+
+        \Illuminate\Support\Facades\Log::debug('Pokémon added to team:', [
+            'team_id' => $team->id,
+            'pokemon_id' => $request->pokemon_id,
+            'position' => $request->position
         ]);
 
         return response()->json(['success' => true]);
@@ -170,7 +180,12 @@ class TeamController extends Controller
 
         $team->pokemon()->detach($pokemon->id);
 
-        return back()->with('success', 'Pokémon removed from team!');
+        \Illuminate\Support\Facades\Log::debug('Pokémon removed from team:', [
+            'team_id' => $team->id,
+            'pokemon_id' => $pokemon->id
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -234,11 +249,19 @@ class TeamController extends Controller
     /**
      * Clear the entire team
      */
-    public function clearTeam(Team $team)
+    public function clearTeam(Team $team): \Illuminate\Http\JsonResponse
     {
         $this->authorize('update', $team);
 
+        $pokemonCountBefore = $team->pokemon()->count();
         $team->pokemon()->detach();
+        $pokemonCountAfter = $team->pokemon()->count();
+
+        \Illuminate\Support\Facades\Log::debug('Clear team executed:', [
+            'team_id' => $team->id,
+            'pokemon_count_before' => $pokemonCountBefore,
+            'pokemon_count_after' => $pokemonCountAfter
+        ]);
 
         return response()->json(['success' => true]);
     }
@@ -272,4 +295,12 @@ class TeamController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function save(Team $team)
+    {
+        $this->authorize('update', $team);
+        return response()->json(['success' => true]);
+    }
+
+
 }

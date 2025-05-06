@@ -18,8 +18,7 @@ class Team extends Model
     {
         return $this->belongsToMany(Pokemon::class, 'pokemon_team')
             ->using(TeamPokemon::class)
-            ->withPivot(['moves', 'item', 'position'])
-            ->withTimestamps();
+            ->withPivot('position', 'moves', 'item');
     }
 }
 
