@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add pixelated image rendering */
+.pixel-art {
+    image-rendering: pixelated;
+}
+
+/* Custom Pokémon-style button */
+.btn-pokemon {
+    @apply bg-red-600 hover:bg-red-700 text-white py-3 px-6 border-4 border-black shadow-lg transform hover:scale-105 transition-transform font-press-start text-sm;
+}

@@ -8,6 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pixel-art {
+            image-rendering: pixelated;
+        }
+    </style>
 </head>
 <body class="bg-blue-100 min-h-screen" style="font-family: 'Press Start 2P', cursive;">
 <!-- Header -->
@@ -18,22 +23,22 @@
                 <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball" class="h-12 w-12 mr-4">
                 <h1 class="text-yellow-400 text-2xl md:text-3xl text-shadow">POKÉMON TEAM BUILDER</h1>
             </div>
-                <nav class="flex space-x-2 md:space-x-6">
-                    <a href="{{ route('home') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
-                    @auth
-                        <a href="{{ route('builder') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">BUILDER</a>
-                    @endauth
-                    <a href="{{ route('pokedex') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">POKÉDEX</a>
-                    @auth
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGOUT</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGIN</a>
-                        <a href="{{ route('register') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">REGISTER</a>
-                    @endauth
-                </nav>
+            <nav class="flex space-x-2 md:space-x-6">
+                <a href="{{ route('home') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">HOME</a>
+                @auth
+                    <a href="{{ route('builder') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">BUILDER</a>
+                @endauth
+                <a href="{{ route('pokedex') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">VIEW POKÉDEX</a>
+                @auth
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGOUT</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">LOGIN</a>
+                    <a href="{{ route('register') }}" class="text-white hover:text-yellow-300 text-sm md:text-base">REGISTER</a>
+                @endauth
+            </nav>
         </div>
     </div>
 </header>
@@ -46,8 +51,8 @@
             <p class="text-gray-800 text-sm md:text-base mb-6">
                 Build, share, and battle with teams from the original 151 Pokémon!
             </p>
-                        <a href="{{ route('builder') }}" class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg inline-block border-2 border-black shadow-lg transform hover:scale-105 transition-transform">
-                            START BUILDING
+            <a href="{{ route('builder') }}" class="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg inline-block border-2 border-black shadow-lg transform hover:scale-105 transition-transform">
+                START BUILDING
             </a>
         </div>
 
@@ -58,7 +63,7 @@
                      onclick="window.location.href='/pokedex/{{ $pokemon->id }}'">
                     <img src="{{ $pokemon->sprite_url }}"
                          alt="{{ $pokemon->name }}"
-                         class="w-full h-24 object-contain">
+                         class="w-full h-24 object-contain pixel-art">
                     <p class="text-xs mt-2 text-gray-800">{{ strtoupper($pokemon->name) }}</p>
                 </div>
             @endforeach
@@ -73,24 +78,31 @@
                 <h3 class="text-red-600 text-sm md:text-base mb-2">TEAM BUILDER</h3>
                 <p class="text-gray-700 text-xs">Create teams with real PokéAPI data including stats, moves, and abilities.</p>
             </div>
-            <img src="{{ $charizard->sprite_url }}"
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
                  alt="Charizard"
-                 class="w-full rounded border-2 border-gray-400">
+                 class="w-full h-24 object-contain pixel-art rounded border-2 border-gray-400">
         </div>
 
-        <!-- Repeat for other cards -->
+        <!-- Pokédex Card -->
         <div class="bg-gray-200 p-4 rounded-lg border-4 border-gray-400">
-            <!-- ... -->
-            <img src="{{ $blastoise->sprite_url }}"
+            <div class="bg-gray-300 p-2 mb-3 rounded border-2 border-gray-500">
+                <h3 class="text-red-600 text-sm md:text-base mb-2">POKÉDEX</h3>
+                <p class="text-gray-700 text-xs">Explore all 151 Gen 1 Pokémon with detailed stats and moves.</p>
+            </div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png"
                  alt="Blastoise"
-                 class="w-full rounded border-2 border-gray-400">
+                 class="w-full h-24 object-contain pixel-art rounded border-2 border-gray-400">
         </div>
 
+        <!-- Community Card -->
         <div class="bg-gray-200 p-4 rounded-lg border-4 border-gray-400">
-            <!-- ... -->
-            <img src="{{ $venusaur->sprite_url }}"
+            <div class="bg-gray-300 p-2 mb-3 rounded border-2 border-gray-500">
+                <h3 class="text-red-600 text-sm md:text-base mb-2">COMMUNITY TEAMS</h3>
+                <p class="text-gray-700 text-xs">Share your teams and discover builds from other trainers.</p>
+            </div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"
                  alt="Venusaur"
-                 class="w-full rounded border-2 border-gray-400">
+                 class="w-full h-24 object-contain pixel-art rounded border-2 border-gray-400">
         </div>
     </div>
 
@@ -109,13 +121,14 @@
                             <div class="text-center">
                                 <img src="{{ $pokemon->sprite_url }}"
                                      alt="{{ $pokemon->name }}"
-                                     class="w-full h-12 object-contain">
+                                     class="w-full h-12 object-contain pixel-art">
                             </div>
                         @endforeach
                     </div>
                     <div class="mt-3 flex justify-between items-center">
                         <span class="text-gray-600 text-xs">BY {{ $team['user'] }}</span>
-                        <a href="/teams/{{ $team['id'] ?? '1' }}" class="text-blue-600 hover:text-blue-800 text-xs">VIEW</a>                    </div>
+                        <a href="/teams/{{ $team['id'] ?? '1' }}" class="text-blue-600 hover:text-blue-800 text-xs">VIEW</a>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -148,21 +161,21 @@
 
         featuredIds.forEach(id => {
             axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`)
-        .then(response => {
-                const pokemon = response.data;
-                const pokemonCard = document.createElement('div');
-                pokemonCard.className = 'bg-gray-100 rounded-lg p-2 border-2 border-gray-300 hover:border-yellow-400 transition-colors text-center';
-                pokemonCard.innerHTML = `
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png"
-                                 alt="${pokemon.name}"
-                                 class="w-full h-24 object-contain">
-                            <p class="text-xs mt-2 text-gray-800">${pokemon.name.toUpperCase()}</p>
-                        `;
-                pokemonCard.addEventListener('click', () => {
-                    window.location.href = /pokedex/${pokemon.id};
-                });
-                featuredContainer.appendChild(pokemonCard);
-            })
+                .then(response => {
+                    const pokemon = response.data;
+                    const pokemonCard = document.createElement('div');
+                    pokemonCard.className = 'bg-gray-100 rounded-lg p-2 border-2 border-gray-300 hover:border-yellow-400 transition-colors text-center';
+                    pokemonCard.innerHTML = `
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png"
+                             alt="${pokemon.name}"
+                             class="w-full h-24 object-contain pixel-art">
+                        <p class="text-xs mt-2 text-gray-800">${pokemon.name.toUpperCase()}</p>
+                    `;
+                    pokemonCard.addEventListener('click', () => {
+                        window.location.href = `/pokedex/${pokemon.id}`;
+                    });
+                    featuredContainer.appendChild(pokemonCard);
+                })
                 .catch(error => {
                     console.error('Error fetching Pokémon:', error);
                 });
@@ -183,24 +196,24 @@
             const teamCard = document.createElement('div');
             teamCard.className = 'bg-white p-4 rounded border-2 border-gray-300';
             teamCard.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-red-600 text-sm">${team.name}</h3>
-                        <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">GEN 1</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        ${team.pokemon.map(pokemonId => `
-                            <div class="text-center">
-                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png"
-                                     alt="Pokémon"
-                                     class="w-full h-12 object-contain">
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="mt-3 flex justify-between items-center">
-                        <span class="text-gray-600 text-xs">BY ${team.user}</span>
-                        <a href="/teams/${team.id}" class="text-blue-600 hover:text-blue-800 text-xs">VIEW</a>
-                    </div>
-                `;
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-red-600 text-sm">${team.name}</h3>
+                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">GEN 1</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    ${team.pokemon.map(pokemonId => `
+                        <div class="text-center">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png"
+                                 alt="Pokémon"
+                                 class="w-full h-12 object-contain pixel-art">
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="mt-3 flex justify-between items-center">
+                    <span class="text-gray-600 text-xs">BY ${team.user}</span>
+                    <a href="/teams/${team.id}" class="text-blue-600 hover:text-blue-800 text-xs">VIEW</a>
+                </div>
+            `;
             recentTeamsContainer.appendChild(teamCard);
         });
     });
