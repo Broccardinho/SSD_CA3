@@ -50,3 +50,9 @@ Route::prefix('teams/{team}')->middleware('auth')->group(function() {
 Route::get('/pokemon/search', [App\Http\Controllers\PokemonController::class, 'search'])->name('pokemon.search');
 
 Route::put('/teams/{team}', [App\Http\Controllers\TeamController::class, 'save'])->middleware('auth')->name('teams.save');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
