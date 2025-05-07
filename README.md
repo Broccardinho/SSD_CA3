@@ -1,4 +1,5 @@
 # Pokémon Team Builder
+![image](https://github.com/user-attachments/assets/b048d2b8-8744-4026-801e-261d416133a2)
 
 Pokémon Team Builder is a Laravel web application that allows users to create and manage teams of Generation 1 Pokémon. The application features a complete Pokédex, team building functionality, and user authentication.
 
