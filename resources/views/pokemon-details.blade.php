@@ -32,10 +32,21 @@
         .detail-card {
             background: #ffffff;
             border: 4px solid #3B4CCA;
-            border-radius: 8px;
-            padding: 1rem;
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 360px; /* Standard width for Basic Info */
+            margin: 0 auto;
+        }
+
+        .stats-card {
+            max-width: 400px; /* Slightly wider for Stats */
+        }
+
+        .evolutions-card {
+            max-width: 420px; /* Wider for Evolutions to prevent compression */
         }
 
         .move-item {
@@ -62,6 +73,42 @@
             height: 192px;
         }
 
+        .shiny-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .shiny-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #FFD700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            color: #000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform: rotate(15deg);
+        }
+
+        .weakness-item {
+            display: inline-block;
+            margin: 2px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            border: 2px solid transparent;
+            color: #fff;
+        }
+
+        .effectiveness-4 { background-color: #FF4444; border-color: #FF0000; }
+        .effectiveness-2 { background-color: #FF8888; }
+        .effectiveness-1 { background-color: #A0A0A0; }
+        .effectiveness-0_5 { background-color: #88CC88; }
+        .effectiveness-0_25 { background-color: #44AA44; border-color: #00FF00; }
+        .effectiveness-0 { background-color: #666666; }
+
         .loading-pokeball {
             animation: spin 1s linear infinite;
             width: 60px;
@@ -71,6 +118,46 @@
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+
+        .sprite-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .stat-item {
+            width: 100%;
+            text-align: left;
+            padding: 0 0.5rem;
+        }
+
+        /* Evolution chain styling */
+        .evolution-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px; /* Prevent compression */
+            margin: 0 0.5rem;
+        }
+
+        /* Layout for detail cards */
+        .details-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem; /* Near-touching boxes */
+            margin-bottom: 1.5rem;
+        }
+
+        .full-width-card {
+            width: 100%;
+            max-width: 95%; /* Nearly full width of parent */
+            margin: 0 auto;
+        }
+
+        /* Parent container */
+        .main-container {
+            padding: 1rem; /* Minimal padding for full-width cards */
         }
     </style>
 </head>
@@ -91,7 +178,7 @@
 </header>
 
 <main class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg border-4 border-blue-800 p-4 shadow-lg">
+    <div class="main-container bg-white rounded-lg border-4 border-blue-800 shadow-lg">
         <!-- Loading State -->
         <div id="loading-state" class="text-center p-8">
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
@@ -120,15 +207,25 @@
                     <span id="pokemon-id" class="text-gray-500 text-xl">#000</span>
                 </div>
                 <div id="pokemon-types" class="flex justify-center gap-2 mb-4"></div>
-                <img id="pokemon-sprite"
-                     src=""
-                     alt=""
-                     class="pixel-art mx-auto hover:scale-105 transition-transform cursor-pointer"
-                     onclick="toggleSprite()">
+                <div class="sprite-container flex justify-center gap-2">
+                    <img id="pokemon-sprite"
+                         src=""
+                         alt=""
+                         class="pixel-art mx-auto hover:scale-105 transition-transform cursor-pointer"
+                         onclick="toggleSprite()">
+                    <div class="shiny-container">
+                        <img id="pokemon-shiny"
+                             src=""
+                             alt="Shiny"
+                             class="pixel-art mx-auto hover:scale-105 transition-transform cursor-pointer"
+                             onclick="toggleSprite()">
+                        <div id="shiny-badge" class="shiny-badge hidden">SHINY!</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Details Row (Basic Info, Stats, Evolutions) -->
+            <div class="details-row">
                 <!-- Basic Info -->
                 <div class="detail-card">
                     <h3 class="text-gray-800 text-lg mb-4 border-b-2 border-gray-300 pb-2">BASIC INFO</h3>
@@ -149,20 +246,26 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="detail-card">
+                <div class="detail-card stats-card">
                     <h3 class="text-gray-800 text-lg mb-4 border-b-2 border-gray-300 pb-2">STATS</h3>
-                    <div id="pokemon-stats" class="space-y-3"></div>
+                    <div id="pokemon-stats" class="space-y-2"></div>
                 </div>
 
                 <!-- Evolutions -->
-                <div class="detail-card">
+                <div class="detail-card evolutions-card">
                     <h3 class="text-gray-800 text-lg mb-4 border-b-2 border-gray-300 pb-2">EVOLUTIONS</h3>
                     <div id="pokemon-evolutions" class="flex justify-center items-center py-2"></div>
                 </div>
             </div>
 
+            <!-- Type Weaknesses -->
+            <div class="detail-card full-width-card mb-6">
+                <h3 class="text-gray-800 text-lg mb-4 border-b-2 border-gray-300 pb-2">TYPE WEAKNESSES</h3>
+                <div id="pokemon-weaknesses" class="flex flex-wrap justify-center gap-1"></div>
+            </div>
+
             <!-- Moves Section -->
-            <div class="detail-card">
+            <div class="detail-card full-width-card">
                 <h3 class="text-gray-800 text-lg mb-4 border-b-2 border-gray-300 pb-2">MOVES</h3>
                 <div id="pokemon-moves" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2"></div>
             </div>
@@ -173,6 +276,7 @@
 <script>
     let currentPokemon = null;
     let isFrontSprite = true;
+    let isShiny = false;
     const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -184,11 +288,11 @@
             showLoading();
             const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
             currentPokemon = response.data;
-            displayPokemonDetails(currentPokemon);
+            await displayPokemonDetails(currentPokemon);
             hideLoading();
         } catch (error) {
-            showError();
             console.error("Error loading Pokémon:", error);
+            showError();
         }
     }
 
@@ -199,10 +303,21 @@
         document.getElementById('pokemon-height').textContent = `${pokemon.height / 10}m`;
         document.getElementById('pokemon-weight').textContent = `${pokemon.weight / 10}kg`;
 
-        // Sprite
+        // Sprites
         const spriteImg = document.getElementById('pokemon-sprite');
+        const shinyImg = document.getElementById('pokemon-shiny');
+        if (!spriteImg || !shinyImg) {
+            console.error("Sprite elements not found in DOM");
+            showError();
+            return;
+        }
+
         spriteImg.src = pokemon.sprites.front_default || `${SPRITE_BASE}${pokemon.id}.png`;
+        shinyImg.src = pokemon.sprites.front_shiny || pokemon.sprites.front_default || `${SPRITE_BASE}${pokemon.id}.png`;
+        shinyImg.style.opacity = pokemon.sprites.front_shiny ? '1' : '0.3';
+        document.getElementById('shiny-badge').classList.toggle('hidden', !isShiny || !pokemon.sprites.front_shiny);
         spriteImg.onerror = () => spriteImg.src = `${SPRITE_BASE}0.png`;
+        shinyImg.onerror = () => shinyImg.src = `${SPRITE_BASE}0.png`;
 
         // Types
         const typesContainer = document.getElementById('pokemon-types');
@@ -224,7 +339,7 @@
         // Stats
         const statsContainer = document.getElementById('pokemon-stats');
         statsContainer.innerHTML = pokemon.stats.map(stat => `
-            <div class="text-sm">
+            <div class="stat-item text-sm">
                 <div class="flex justify-between mb-1">
                     <span>${stat.stat.name.toUpperCase()}</span>
                     <span>${stat.base_stat}</span>
@@ -257,7 +372,7 @@
 
                 // Hover effects
                 moveElement.addEventListener('mouseover', () => {
-                    moveElement.style.backgroundColor = shadeColor(originalColor, -20);
+                    moveElement.style.backgroundColor = shadeColor(originalColor, 20);
                 });
                 moveElement.addEventListener('mouseout', () => {
                     moveElement.style.backgroundColor = originalColor;
@@ -269,8 +384,65 @@
             movesContainer.appendChild(moveElement);
         }
 
+        // Weaknesses
+        const weaknesses = await calculateWeaknesses(pokemon.types);
+        displayWeaknesses(weaknesses);
+
         // Evolutions
         loadEvolutionChain(pokemon.species.url);
+    }
+
+    async function calculateWeaknesses(types) {
+        const typeRelations = {};
+        try {
+            for (const typeData of types) {
+                const typeResponse = await axios.get(typeData.type.url);
+                const relations = typeResponse.data.damage_relations;
+                relations.double_damage_from.forEach(t => {
+                    typeRelations[t.name] = (typeRelations[t.name] || 1) * 2;
+                });
+                relations.half_damage_from.forEach(t => {
+                    typeRelations[t.name] = (typeRelations[t.name] || 1) * 0.5;
+                });
+                relations.no_damage_from.forEach(t => {
+                    typeRelations[t.name] = 0;
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching type data:", error);
+            return {};
+        }
+        return Object.entries(typeRelations).reduce((acc, [type, multiplier]) => {
+            const key = multiplier.toFixed(2);
+            acc[key] = acc[key] || [];
+            acc[key].push(type);
+            return acc;
+        }, {});
+    }
+
+    function displayWeaknesses(weaknesses) {
+        const container = document.getElementById('pokemon-weaknesses');
+        container.innerHTML = '';
+        Object.entries(weaknesses).sort((a, b) => b[0] - a[0]).forEach(([multiplier, types]) => {
+            const effectivenessClass = getEffectivenessClass(parseFloat(multiplier));
+            types.forEach(type => {
+                const element = document.createElement('span');
+                element.className = `weakness-item ${effectivenessClass}`;
+                element.textContent = type;
+                element.title = `${multiplier}x effectiveness`;
+                container.appendChild(element);
+            });
+        });
+    }
+
+    function getEffectivenessClass(multiplier) {
+        if (multiplier === 4) return 'effectiveness-4';
+        if (multiplier === 2) return 'effectiveness-2';
+        if (multiplier === 1) return 'effectiveness-1';
+        if (multiplier === 0.5) return 'effectiveness-0_5';
+        if (multiplier === 0.25) return 'effectiveness-0_25';
+        if (multiplier === 0) return 'effectiveness-0';
+        return '';
     }
 
     async function loadEvolutionChain(speciesUrl) {
@@ -278,10 +450,9 @@
             const speciesResponse = await axios.get(speciesUrl);
             const evolutionResponse = await axios.get(speciesResponse.data.evolution_chain.url);
             const evolutions = getEvolutionChain(evolutionResponse.data.chain);
-
             const evoContainer = document.getElementById('pokemon-evolutions');
             evoContainer.innerHTML = evolutions.map((evo, index) => `
-                <div class="inline-block mx-2 ${evo.name === currentPokemon.name ? 'scale-110' : 'opacity-75'}">
+                <div class="evolution-item ${evo.name === currentPokemon.name ? 'scale-110' : 'opacity-75'}">
                     <img src="${SPRITE_BASE}${evo.id}.png"
                          alt="${evo.name}"
                          class="w-16 h-16 mx-auto pixel-art">
@@ -295,7 +466,6 @@
         }
     }
 
-    // Helper functions
     function getEvolutionChain(chain) {
         const evolutions = [];
         let currentChain = chain;
@@ -310,21 +480,43 @@
     }
 
     function shadeColor(color, percent) {
-        const num = parseInt(color.replace('#',''), 16);
+        let R, G, B;
+        if (color.startsWith('rgb')) {
+            const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (!match) return color;
+            R = parseInt(match[1]);
+            G = parseInt(match[2]);
+            B = parseInt(match[3]);
+        } else {
+            const num = parseInt(color.replace('#', ''), 16);
+            R = (num >> 16) & 255;
+            G = (num >> 8) & 255;
+            B = num & 255;
+        }
         const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return `#${(1 << 24 | (R < 255 ? R < 1 ? 0 : R : 255) << 16 | (G < 255 ? G < 1 ? 0 : G : 255) << 8 | (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1)}`;
+        R = Math.min(255, Math.max(0, R + amt));
+        G = Math.min(255, Math.max(0, G + amt));
+        B = Math.min(255, Math.max(0, B + amt));
+        return `rgb(${R}, ${G}, ${B})`;
     }
 
     function toggleSprite() {
         if (!currentPokemon) return;
         isFrontSprite = !isFrontSprite;
         const sprite = document.getElementById('pokemon-sprite');
+        const shiny = document.getElementById('pokemon-shiny');
+        if (!sprite || !shiny) {
+            console.error("Sprite elements not found in DOM during toggle");
+            return;
+        }
         sprite.src = isFrontSprite
-            ? currentPokemon.sprites.front_default
-            : currentPokemon.sprites.back_default;
+            ? (isShiny ? (currentPokemon.sprites.front_shiny || currentPokemon.sprites.front_default) : currentPokemon.sprites.front_default || `${SPRITE_BASE}${currentPokemon.id}.png`)
+            : (isShiny ? (currentPokemon.sprites.back_shiny || currentPokemon.sprites.back_default) : currentPokemon.sprites.back_default || `${SPRITE_BASE}${currentPokemon.id}.png`);
+        shiny.src = isFrontSprite
+            ? (isShiny ? currentPokemon.sprites.front_default : (currentPokemon.sprites.front_shiny || currentPokemon.sprites.front_default) || `${SPRITE_BASE}${currentPokemon.id}.png`)
+            : (isShiny ? currentPokemon.sprites.back_default : (currentPokemon.sprites.back_shiny || currentPokemon.sprites.back_default) || `${SPRITE_BASE}${currentPokemon.id}.png`);
+        shiny.style.opacity = currentPokemon.sprites[isShiny ? 'front_default' : 'front_shiny'] ? '1' : '0.3';
+        document.getElementById('shiny-badge').classList.toggle('hidden', !isShiny || !currentPokemon.sprites[isShiny ? 'front_default' : 'front_shiny']);
     }
 
     function showLoading() {

@@ -10,6 +10,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.tailwindcss.com"></script>
+
     </head>
     <style>
         .pokedex-grid {
